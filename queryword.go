@@ -1,8 +1,9 @@
-package drae
+package gorae
 
 import (
 	"fmt"
 	"log"
+	"strings"
 
 	"github.com/PuerkitoBio/goquery"
 	"github.com/rulu158/gorae/scraper"
@@ -20,6 +21,19 @@ func QueryWord(word string) (*WordDefinition, error) {
 	}
 
 	return definition, nil
+}
+
+func QueryWordJSON(word string) (string, error) {
+	definition, err := QueryWord(word)
+	if err != nil {
+		return "", err
+	}
+
+	definitionJSON, err := convertWordDefinitionToJSON(definition)
+	if err != nil {
+		return "", err
+	}
+	return string(definitionJSON), nil
 }
 
 func getWordDefinition(doc *goquery.Document) (*WordDefinition, error) {
@@ -46,11 +60,12 @@ func getWordDefinitionEntries(articleSelection *goquery.Selection) ([]*WordDefin
 
 	articleSelection.Find("p.j, p.j2").Each(func(i int, entrySelection *goquery.Selection) {
 		var num int
-		var types, definition string
+		var types, definition, examples string
 
 		entrySelection.Each(func(i int, chunk *goquery.Selection) {
+			// entry number
 			if chunk.Find("span.n_acep").Text() != "" {
-				n, err := SanitizeStrNum(chunk.Find("span.n_acep").Text())
+				n, err := sanitizeStrNum(chunk.Find("span.n_acep").Text())
 				if err != nil {
 					log.Fatal(err)
 				}
@@ -58,22 +73,31 @@ func getWordDefinitionEntries(articleSelection *goquery.Selection) ([]*WordDefin
 				num = n
 			}
 
+			// types of the entry
 			chunk.Find("abbr.d, abbr.g").Each(func(i int, title *goquery.Selection) {
 				typeOfEntry, _ := title.Attr("title")
 				types += typeOfEntry + ", "
 			})
-			types = types[0 : len(types)-2]
+			types = strings.Trim(types, " ,") // remove last ' ' and ','
 
+			// examples of entry
+			chunk.Find("span.h").Each(func(i int, exampleSelection *goquery.Selection) {
+				examples += exampleSelection.Text() + " "
+			})
+			examples = strings.Trim(examples, " ") // Remove last ' '
+
+			// remove number, types and examples from DOM so we can get a clean definition
 			chunk.Find("span.n_acep").Remove()
 			chunk.Find("abbr.d, abbr.g").Remove()
 			chunk.Find("span.h").Remove()
-			definition = chunk.Text()
+			definition = strings.Trim(chunk.Text(), " ")
 		})
 
 		entry := &WordDefinitionEntry{
 			Num:        num,
 			Types:      types,
 			Definition: definition,
+			Examples:   examples,
 		}
 
 		entries = append(entries, entry)

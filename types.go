@@ -1,4 +1,4 @@
-package drae
+package gorae
 
 type WordDefinition struct {
 	Word    string                 `json:"word"`
@@ -9,4 +9,5 @@ type WordDefinitionEntry struct {
 	Num        int    `json:"num"`
 	Types      string `json:"type"`
 	Definition string `json:"definition"`
+	Examples   string `json:"examples"`
 }
