@@ -23,13 +23,18 @@ func QueryWord(word string) (*WordDefinition, error) {
 	return definition, nil
 }
 
-func QueryWordJSON(word string) (string, error) {
+func QueryWordJSON(word string, minifyJSON ...bool) (string, error) {
 	definition, err := QueryWord(word)
 	if err != nil {
 		return "", err
 	}
 
-	definitionJSON, err := convertWordDefinitionToJSON(definition)
+	minify := false
+	if len(minifyJSON) > 0 && minifyJSON[0] {
+		minify = true
+	}
+
+	definitionJSON, err := convertWordDefinitionToJSON(definition, minify)
 	if err != nil {
 		return "", err
 	}

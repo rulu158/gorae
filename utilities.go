@@ -7,8 +7,15 @@ import (
 	"strings"
 )
 
-func convertWordDefinitionToJSON(wordDefinition *WordDefinition) (string, error) {
-	wordDefinitionJson, err := json.Marshal(wordDefinition)
+func convertWordDefinitionToJSON(wordDefinition *WordDefinition, minify bool) (string, error) {
+	var wordDefinitionJson []byte
+	var err error
+
+	if minify {
+		wordDefinitionJson, err = json.Marshal(wordDefinition)
+	} else {
+		wordDefinitionJson, err = json.MarshalIndent(wordDefinition, "", "    ")
+	}
 	if err != nil {
 		return "", err
 	}
