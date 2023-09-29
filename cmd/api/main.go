@@ -1,6 +1,6 @@
 package main
 
-const port = ":8040"
+const port = ":9940"
 
 func main() {
 	srv := NewServer()
