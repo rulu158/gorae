@@ -65,7 +65,19 @@ func getWordDefinitionEntries(articleSelection *goquery.Selection) ([]*WordDefin
 
 	articleSelection.Find("p.j, p.j2").Each(func(i int, entrySelection *goquery.Selection) {
 		var num int
-		var types, definition, examples string
+		var types, definition, synonyms, antonyms, examples string
+
+		// synonyms of the entry
+		entrySelection.Next().Find("table.sinonimos tr:nth-child(1) span.sin").Each(func(i int, synonym *goquery.Selection) {
+			synonyms += synonym.Text() + ", "
+		})
+		synonyms = strings.Trim(synonyms, " ,")
+
+		// antonyms of the entry
+		entrySelection.Next().Find("table.sinonimos tr:nth-child(2) span.sin").Each(func(i int, antonym *goquery.Selection) {
+			antonyms += antonym.Text() + ", "
+		})
+		antonyms = strings.Trim(antonyms, " ,")
 
 		entrySelection.Each(func(i int, chunk *goquery.Selection) {
 			// entry number
@@ -102,6 +114,8 @@ func getWordDefinitionEntries(articleSelection *goquery.Selection) ([]*WordDefin
 			Num:        num,
 			Types:      types,
 			Definition: definition,
+			Synonyms:   synonyms,
+			Antonyms:   antonyms,
 			Examples:   examples,
 		}
 

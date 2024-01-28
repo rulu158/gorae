@@ -18,7 +18,7 @@ func (srv *Server) GetWordDefinition(ctx *gin.Context) {
 
 	json, err := gorae.QueryWordJSON(word, minify)
 	if err != nil {
-		ctx.String(http.StatusInternalServerError, "query failed; word not in DRAE?")
+		ctx.String(http.StatusInternalServerError, "query failed; word not in DRAE? : "+err.Error()+" : "+word)
 		return
 	}
 
